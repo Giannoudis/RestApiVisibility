@@ -1,5 +1,5 @@
 ﻿
-namespace RestApi;
+namespace RestApiVisibility;
 
 /// <summary>The REST API configuration</summary>
 public class ApiConfiguration

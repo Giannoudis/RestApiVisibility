@@ -1,3 +1,4 @@
+using RestApiVisibility;
 
 namespace RestApi;
 

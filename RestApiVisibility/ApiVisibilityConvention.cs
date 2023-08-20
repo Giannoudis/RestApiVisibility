@@ -2,12 +2,12 @@
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.Routing;
 
-namespace RestApi;
+namespace RestApiVisibility;
 
 /// <summary>
 /// API endpoint visibility conventions
 /// </summary>
-internal sealed class ApiVisibilityConvention : IActionModelConvention
+public sealed class ApiVisibilityConvention : IActionModelConvention
 {
     private List<string> VisibleItems { get; }
     private List<string> HiddenItems { get; }
@@ -17,7 +17,7 @@ internal sealed class ApiVisibilityConvention : IActionModelConvention
     /// </summary>
     /// <param name="visibleItems">List of visible items name masks (wildcards: *?)</param>
     /// <param name="hiddenItems">List of hidden items name masks (wildcards: *?)</param>
-    internal ApiVisibilityConvention(IEnumerable<string>? visibleItems = null,
+    public ApiVisibilityConvention(IEnumerable<string>? visibleItems = null,
         IEnumerable<string>? hiddenItems = null)
     {
         VisibleItems = visibleItems != null ? new(visibleItems) : new();
