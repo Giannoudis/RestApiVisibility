@@ -1,30 +1,30 @@
 # REST API Visibility Control
 
-Tools wie Swagger sind bei der Dokumentation von REST APIs weit verbreitet. Die REST Endpunkte mittels Controller gruppiert und können einen Namen (OperationId) besitzen.
-Im UI werden im Normalfall alle REST Endpunkte angezeigt, was nicht immer erwünscht ist
-- Ausblenden von Endpunkten welche nicht über das UI gesteuert werden können
-- Ein oder Ausblenden von Endpunkten zum Anwendungskontext wie z.B. Audits, oder Experience-/Integration-Level
-- Reduzieren von Endpunkten in der Entwicklung als Startoptimierung und UI Reduizierung
+Tools such a Swagger are widely used to document REST APIs. REST endpoints are grouped by controller and may have a name (OperationId).
+The UI typically shows all REST endpoints, which is not always desirable.
+- Hide endpoints that cannot be controlled from the UI.
+- Show or hide endpoints based on application context, such as audits or experience/integration levels.
+- Reduce endpoints in development for startup optimization and UI reduction.
 
- Der folgende Lösungsansatz zeigt auf, wie konfigurationsbasierend REST Endpunkte ein- oder ausgeblendet werden.
+ The following solution approach shows how to show or hide REST endpoints based on configuration.
 
- > 👉 Das Verbergen eines Endpunktes wirkt sich nicht auf dessen Verfügbarkeit aus, REST Clients könen diesen uneingeschränkt nutzen.
+ > 👉 Hiding an endpoint does not affect its availability; REST clients can still use it without restriction.
 
-### Filterkonfiguration
-Die Sichtbarkeit von Endpunkten wird in Konfigurationsdatei der Applikation bestimmt, wo die sichtbaren und/oder unsichtbarn Filter gesetzt werden. Folgende Varianten sind möglich:
-- Filter nach sichtbaren Endpunkten
-- Filter nach unsichtbaren Endpunkten
-- Kombinierter Filer der sichtbaren Endpunkte mit einer Untermenge von den unsichtbaren Endpunkten
+### Filter Configuration
+Endpoint visibility is defined in the `appsettings.json` application configuration file, where visible and/or invisible filters are set. The following options are available:
+- Filter on visible endpoints
+- Filter on invisible endpoints
+- Combined filter of visible endpoints with a subset of invisible endpoints.
 
-Der Endpunktilter ist ein Ausdruck mit dem Format `ControllerMask[.OperationMask]` und untersützt die Masken `?` und `*`.
+The endpoint filter is an expression in `ControllerMask[.OperationMask]` format and supports `?` and `*` masks.
 
-Beispiele von Filterausdrücken:
-- `WeatherForecast` - alle Endpunkte vom `WeatherForecast` Controller
-- `*Audit` - alle Endpunkte vom Controllern deren Namen mit `Audit` endet
-- `WeatherForecast.Get*` - alle Endpunkte vom `WeatherForecast` Controller deren Operationsnamen mit `Get*` beginnt
-- `*.Get*` - alle Endpunkte deren Operationsnamen mit `Get*` beginnt
+Examples of filter expressions:
+- `WeatherForecast` - all endpoints of the `WeatherForecast` controller
+- `*Audit` - all endpoints of the controller whose name ends with `Audit`
+- `WeatherForecast.Get*` - all endpoints of the WeatherForecast controller whose operation name begins with `Get`.
+- `*.Get*` - all endpoints whose operation name begins with `Get`.
 
-Daraus ergibt sich folgende Verwendungsmatrix:
+This results in the following usage matrix:
 
 | Mode     | Visible | Hidden | Example |
 |:---|:---:|:---:|:---|
@@ -32,7 +32,7 @@ Daraus ergibt sich folgende Verwendungsmatrix:
 | Exclude  | ❌     | ✔️     | `"HiddenItems": ["User.*", "WeatherForecast.DeleteWeatherForecast"]` |
 | Mixed    | ✔️     | ✔️     | `"VisibleItems": ["*.Get*"],`<br />`"HiddenItems": ["User.Get*"]` |
 
-Die Filter werden in der Konfigurationsdatei der Applikation `appsettings.json` im Bereich der `ApiConfiguration` bestimmt. Beispiel `Include` Filter:
+The filters are defined in the `ApiConfiguration` section of the configuration file. Example `Include` filter:
 ```json
 "ApiConfiguration": {
   "VisibleItems": [
@@ -42,7 +42,7 @@ Die Filter werden in der Konfigurationsdatei der Applikation `appsettings.json` 
 }
 ```
 
-Beispiel `Exclude` Filter:
+Example `Exclude` filter:
 ```json
 "ApiConfiguration": {
   "HiddenItems": [
@@ -52,7 +52,7 @@ Beispiel `Exclude` Filter:
 }
 ```
 
-Beispiel `Include` Filter kombiniert mit `Exclude` Filter:
+Example of an `Include` filter combined with an `Exclude` filter:
 ```json
 "ApiConfiguration": {
   "VisibleItems": [
@@ -64,11 +64,10 @@ Beispiel `Include` Filter kombiniert mit `Exclude` Filter:
 }
 ```
 
-> Im Entwicklungsmodus empfiehlt sich die Endpunkt Konfiguration in die [User Secrets](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets) auszulagern.
+> 👉 In development mode, it is recommended that you outsource endpoint configuration to [User Secrets](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets).
 
 ### Filter Convention
-ASP.NET bietet mittels [`IActionModelConvention`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.applicationmodels.iactionmodelconvention) die Möglichkeit, die Sichtbarkeit von Endpunkten zu bestimmen. 
-Die Implementierung `ApiVisibilityConvention` steuert die Sichtbarkeit des Endpunktes gemäss den 
+ASP.NET provides the ability to define the visibility of endpoints using the [`ActionModelConvention`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.applicationmodels.iactionmodelconvention). The `ApiVisibilityConvention` implementation controls the visibility of the endpoint based on visible and invisible elements:
 
 ```csharp
 internal sealed class ApiVisibilityConvention : IActionModelConvention
@@ -158,8 +157,8 @@ internal sealed class ApiVisibilityConvention : IActionModelConvention
 }
 ```
 
-### Filter anwenden
-Die Filter werden beim Programmstart aus der Konfiguration `ApiConfiguration` gelesen und die `ApiVisibilityConvention` beim Hinzufügen der Controller registriert:
+### Applying Endpoint Filters
+The filters are read from the `ApiConfiguration` configuration at program startup and the `ApiVisibilityConvention` is registered when controllers are added:
 ```csharp
 1 public class Program
 2 {
@@ -217,25 +216,24 @@ Die Filter werden beim Programmstart aus der Konfiguration `ApiConfiguration` ge
 
 - `8-13` - load the filter configuration
 - `16-24` - apply the visibility convention
-- `39` - turn on the operation id (optional)
+- `39` - display the operation id (optional)
 
-Ist kein Endpunktfilter aktiv, erscheinen im Web UI alle verfügbaren Endpunkte:
+If no endpoint filter is active, all available endpoints are displayed in the Web UI:
 <p align="center">
     <img src="docs/AllEndpoints.png" width="500" alt="All Endpoints" />
 </p>
 
-Endpunkte mit dem `Include` Filter `"VisibleItems": ["User.*", "WeatherForecast.Get*"]`:
+Endpoints with the `Include` filter `"VisibleItems": ["User.*", "WeatherForecast.Get*"]`:
 <p align="center">
     <img src="docs/FilterIncludeEndpoints.png" width="500" alt="All Endpoints" />
 </p>
 
-Endpunkte mit dem `Exclude` Filter `"HiddenItems": ["User.*", "WeatherForecast.DeleteWeatherForecast"]`:
+Endpoints with the `Exclude` filter `"HiddenItems": ["User.*", "WeatherForecast.DeleteWeatherForecast"]`:
 <p align="center">
     <img src="docs/FilterExcludeEndpoints.png" width="500" alt="All Endpoints" />
 </p>
 
-Endpunkte mit dem `Exclude` und `Include` Filter `"VisibleItems": ["*.Get*"],` und `"HiddenItems": ["User.Get*"]`:
+Endpoints with the `Exclude` and `Include` filters `"VisibleItems": ["*.Get*"],` and `"HiddenItems": ["User.Get*"]`:
 <p align="center">
     <img src="docs/FilterMixedEndpoints.png" width="500" alt="All Endpoints" />
 </p>
-
