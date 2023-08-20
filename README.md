@@ -225,15 +225,15 @@ If no endpoint filter is active, all available endpoints are displayed in the We
 
 Endpoints with the `Include` filter `"VisibleItems": ["User.*", "WeatherForecast.Get*"]`:
 <p align="center">
-    <img src="docs/FilterIncludeEndpoints.png" width="500" alt="All Endpoints" />
+    <img src="docs/FilterIncludeEndpoints.png" width="500" alt="Include Endpoints" />
 </p>
 
 Endpoints with the `Exclude` filter `"HiddenItems": ["User.*", "WeatherForecast.DeleteWeatherForecast"]`:
 <p align="center">
-    <img src="docs/FilterExcludeEndpoints.png" width="500" alt="All Endpoints" />
+    <img src="docs/FilterExcludeEndpoints.png" width="500" alt="Exclude Endpoints" />
 </p>
 
 Endpoints with the `Exclude` and `Include` filters `"VisibleItems": ["*.Get*"],` and `"HiddenItems": ["User.Get*"]`:
 <p align="center">
-    <img src="docs/FilterMixedEndpoints.png" width="500" alt="All Endpoints" />
+    <img src="docs/FilterMixedEndpoints.png" width="500" alt="Exclude and Include Endpoints" />
 </p>
