@@ -1,4 +1,4 @@
-namespace RestApi;
+namespace RestApiVisibilityDemo;
 
 public class User
 {

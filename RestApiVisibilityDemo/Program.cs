@@ -1,6 +1,6 @@
 using RestApiVisibility;
 
-namespace RestApi;
+namespace RestApiVisibilityDemo;
 
 public class Program
 {
